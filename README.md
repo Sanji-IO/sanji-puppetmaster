@@ -55,7 +55,7 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
         {
           "id": 123145,
           "createdAt": "2011-12-19T15:28:46.493Z",
-          "finishAt": null,
+          "finishedAt": null,
           "timeout": 36000,
           "status": "dispatching",
           "progress": 0,
@@ -77,7 +77,7 @@ The response for GET has following attributes:
 - **status** (string, `pending`): System timezone settings.
 - **timeout** (integer, `infinity`): Set job's timeout.
 - **createdAt** (string, `currenttime`): Job's creation time.
-- **finishAt** (string, `null`): Job's finish time.
+- **finishedAt** (string, `null`): Job's finish time.
 - **totalCount** (integer): Total count of tasks.
 - **doneCount** (integer): Done count of tasks.
 - **errorCount** (integer): Error count of tasks.
@@ -95,7 +95,7 @@ The response for GET has following attributes:
             {
               "id": 123145,
               "createdAt": "2011-12-19T15:28:46.493Z",
-              "finishAt": "2011-12-19T15:55:46.493Z",
+              "finishedAt": "2011-12-19T15:55:46.493Z",
               "timeout": 36000,
               "status": "dispatching",
               "progress": 100,
@@ -112,7 +112,7 @@ The response for GET has following attributes:
                   "__destination": "00:0c:29:1c:e8:01",
                   "__task": {
                     "createdAt": "2011-12-19T15:28:46.493Z",
-                    "finishAt": null,
+                    "finishedAt": null,
                     "status": "sent",
                     "progress": 0,
                     "result": {}
@@ -127,7 +127,7 @@ The response for GET has following attributes:
                   "__destination": "00:0c:29:1c:e8:02",
                   "__task": {
                     "createdAt": "2011-12-19T15:28:46.493Z",
-                    "finishAt": null,
+                    "finishedAt": null,
                     "status": "sent",
                     "progress": 0,
                     "result": {}
@@ -142,7 +142,7 @@ The response for GET has following attributes:
                   "__destination": "00:0c:29:1c:e8:03",
                   "__task": {
                     "createdAt": "2011-12-19T15:28:46.493Z",
-                    "finishAt": null,
+                    "finishedAt": null,
                     "status": "sent",
                     "progress": 0,
                     "result": {}
@@ -169,7 +169,7 @@ Basically, just extend original *Sanji Message (one-to-one)* with adding two pro
 - **data** (object): Sanji Message's data field.
 - **__destination** (string): This Sanji Message is belong to whom.
 - **__task.createdAt** (object): Creatation time of task.
-- **__task.finishAt** (object): Finish time of task.
+- **__task.finishedAt** (object): Finish time of task.
 - **__task.status** (object): Current status.
 - **__task.progress** (object): Progress.
 - **__task.result** (object): Result of this task.
@@ -191,7 +191,7 @@ Basically, just extend original *Sanji Message (one-to-one)* with adding two pro
               "__destination": "00:0c:29:1c:e8:01",
               "__task": {
                 "createdAt": "2011-12-19T15:28:46.493Z",
-                "finishAt": null,
+                "finishedAt": null,
                 "status": "sent",
                 "progress": 0,
                 "result": {}
