@@ -151,7 +151,15 @@ The response for GET has following attributes:
               ]
             }
 
-## Job WebSocket[/jobs/:id/wc]
+## Job WebSocket[/jobs/:id/ws]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+              "TBD": "TBD"
+            }
 
 ## Task [/task/:id]
 
