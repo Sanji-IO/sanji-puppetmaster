@@ -4,7 +4,8 @@
   "description": "Process batch commands from server to clients.",
   "main": "index.js",
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "test-travis": "make test-travis"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,16 @@
   "bugs": {
     "url": "https://github.com/Sanji-IO/sanji-puppetmaster/issues"
   },
-  "homepage": "https://github.com/Sanji-IO/sanji-puppetmaster"
+  "homepage": "https://github.com/Sanji-IO/sanji-puppetmaster",
+  "devDependencies": {
+    "coveralls": "^2.11.2",
+    "istanbul": "^0.3.2",
+    "mocha": "^1.21.5",
+    "mocha-lcov-reporter": "0.0.1",
+    "should": "^4.0.4",
+    "sinon": "^1.10.3"
+  },
+  "dependencies": {
+    "moment": "^2.8.3"
+  }
 }
