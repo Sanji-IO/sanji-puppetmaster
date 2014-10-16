@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - "0.10"
-script: npm scripts test-travis
+script: npm run-script test-travis
 notifications:
   slack:
     rooms:
