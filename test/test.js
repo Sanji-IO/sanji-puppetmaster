@@ -2,6 +2,7 @@ var should = require("should");
 var sinon = require("sinon");
 var Task = require("../lib/task");
 var Job = require("../lib/job");
+var Storage = require("../lib/storage");
 
 var request = {
   id: 1,
@@ -115,6 +116,19 @@ describe("Task", function() {
     });
   });
 
+  describe("save/load task", function() {
+    var t = new Task(destinations[0], request);
+    it("should return correct properties", function() {
+      var cb = function() {
+        var jsonString = t.json();
+        var obj = JSON.parse(jsonString);
+        t.__task.should.have.ownProperty("timeoutTimer");
+        obj.__task.should.not.have.ownProperty("timeoutTimer");
+      };
+      t.submit(cb);
+    });
+  });
+
 });
 
 describe("Job", function() {
@@ -203,4 +217,34 @@ describe("Job", function() {
       j.submitAll(doneCb, updateCb);
     });
   });
+});
+
+describe("Storage", function() {
+  describe("create a storage instance (memory)", function() {
+    var s = new Storage();
+    it("should be created as a storage instance", function() {
+      s.should.be.a.Storage;
+      s.connection.type.should.be.equal("memory");
+    });
+
+    it("should be able to save/load", function() {
+      s.save("123");
+      s.load().should.be.equal("123");
+    });
+  });
+
+  describe("create a storage instance (file)", function() {
+    var s = new Storage("/tmp");
+    it("should be created as a storage instance", function() {
+      s.should.be.a.Storage;
+      s.connection.type.should.be.equal("file");
+    });
+
+    it("should be able to save/load", function() {
+      var obj = {"dummy": "this is a dummy object"};
+      var filename = s.save(obj);
+      s.load(filename).should.be.containEql(obj);
+    });
+  });
+
 });
