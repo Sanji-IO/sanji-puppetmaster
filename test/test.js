@@ -179,4 +179,28 @@ describe("Job", function() {
       j.submitAll(cb);
     });
   });
+
+  describe("update status immediately", function() {
+    var j = new Job(destinations, request);
+    it("should update *counts when tasks updated", function(done) {
+      j.collection[0]._send = function(cb) {
+        cb("error", j.collection[0]);
+      };
+      var spy = sinon.spy();
+      var doneCb = function() {
+        spy.called.should.be.true;
+        done();
+      };
+
+      var updateCb = function(err, task) {
+        if (err) {
+          task.__task.status.should.be.equal("error");
+          j.errorCount.should.not.equal(0);
+        }
+        spy();
+      };
+
+      j.submitAll(doneCb, updateCb);
+    });
+  });
 });
