@@ -47,9 +47,9 @@ describe("Task", function() {
     it("should return Array of Tasks when passing cg-id array" +
       "(length > 1)", function() {
       var ts = new Task(destinations, request);
-      ts.should.be.instanceof(Array);
+      ts.should.be.Array;
       ts.forEach(function(t) {
-        t.should.be.instanceof(Task);
+        t.should.be.Task;
       });
     });
   });
@@ -154,6 +154,27 @@ describe("Job", function() {
     });
   });
 
+  describe("create a job with a single task", function() {
+    var j = new Job("cg-000c291ce801", request);
+    it("should return collection with 1 task", function() {
+      j.collection.should.be.lengthOf(1);
+      j.totalCount.should.be.equal(1);
+    });
+
+    it("should be able to submit all tasks and update status/progress",
+      function(done) {
+        var cb = function(err, job) {
+          should(err).be.null;
+          job.collection[0].__task.status.should.be.equal("resloved");
+          job.doneCount.should.be.equal(1);
+          job.errorCount.should.be.equal(0);
+          job.progress.should.be.equal(100);
+          done();
+        };
+        j.submitAll(cb);
+    });
+  });
+
   describe("create a job with 3 tasks", function() {
     var j = new Job(destinations, request);
     it("should return collection with 3 task", function() {
@@ -164,6 +185,7 @@ describe("Job", function() {
     it("should be able to submit all tasks and update status/progress",
       function(done) {
         var cb = function(err, job) {
+          should(err).be.null;
           job.collection.forEach(function(task) {
             task.__task.status.should.be.equal("resloved");
           });
