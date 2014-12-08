@@ -13,27 +13,26 @@ Process batch command/data/event from server to clients.
 Endpoints
 ---------
 - **/jobs** [GET] [POST] List/Create current jobs.
-- **/jobs/:id** [GET] [DELETE] `?collection=true` to embedded tasks in `collection`.
+- **/jobs/:id** [GET] [DELETE] `?collection=true` to embedded requests in `collection`.
 - **/jobs/:id/ws** WebSocket for job's realtime information.
-- **/tasks/:id** [GET] Get task information.
+- **/requests/:id** [GET] Get request information.
 
-REST API
---------
+RESTful API
+-----------
 
 ## Job Collection [/jobs]
-A set of jobs meta information
+A set of jobs meta information.
 
 ### Create a job [POST]
-
 The request for POST has following attributes:
-- **timeout** (optional, integer, `infinity`): Set job's timeout.
-- **batch[].method** (required, enum): Http method (GET, POST, PUT, DELETE)
+- **timeout** (optional, integer, `infinity`): Set job's timeout (unit: seconds).
+- **batch[].method** (required, enum): Http methods (GET, POST, PUT, DELETE)
 - **batch[].resource** (required, string): Http uri
 - **batch[].data** (optional, object): Request content.
-- **batch[].__destination** (required, array|string): Create job for whom. If passed an array it will automatically expand for you and create tasks per destination.
+- **batch[].__request.__destination** (required, array|string): Create job for whom. If passed an array it will automatically expand for you and create requests per destination.
 
 The response for POST has following attributes:
-- **collection** (array): IDs of tasks belongs to this job.
+- **requests** (array): IDs of requests belongs to this job.
 
 Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` at once.
 
@@ -45,7 +44,9 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
               "method": "post",
               "resource", "/system/reboot",
               "data": {},
-              "__destination": ["00:0c:29:1c:e8:01", "00:0c:29:1c:e8:02", "00:0c:29:1c:e8:03"]
+              "__request": {
+                "destination": ["00:0c:29:1c:e8:01", "00:0c:29:1c:e8:02", "00:0c:29:1c:e8:03"]
+              }
             }
           ]
         }
@@ -62,7 +63,7 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
           "totalCount": 3,
           "finishCount": 0,
           "errorCount": 0,
-          "collection": [3452, 365, 546345]
+          "requests": [3452, 365, 546345]
         }
 
 
@@ -73,15 +74,15 @@ Single job information
 
 The response for GET has following attributes:
 
-- **progress** (integer, `0`): Current progres of all tasks in this job.
-- **status** (string, `pending`): System timezone settings.
+- **progress** (integer, `0`): Current progres of all requests in this job.
+- **status** (string, `pending`): Job's current status.
 - **timeout** (integer, `infinity`): Set job's timeout.
 - **createdAt** (string, `currenttime`): Job's creation time.
 - **finishedAt** (string, `null`): Job's finish time.
-- **totalCount** (integer): Total count of tasks.
-- **doneCount** (integer): Done count of tasks.
-- **errorCount** (integer): Error count of tasks.
-- **collection** (array): Tasks in this job.
+- **totalCount** (integer): Total count of requests.
+- **doneCount** (integer): Done count of requests.
+- **errorCount** (integer): Error count of requests.
+- **requests** (array): Requests in this job.
 
 
 + Response 200 (application/json)
@@ -102,15 +103,15 @@ The response for GET has following attributes:
               "totalCount": 5,
               "finishCount": 3,
               "errorCount": 2,
-              "collection": [
+              "requests": [
                 {
                   "id": 5648943,
                   "method": "post",
                   "resource", "/system/reboot",
                   "tunnel": "/remote",
                   "data": {},
-                  "__destination": "00:0c:29:1c:e8:01",
-                  "__task": {
+                  "__request": {
+                    "destination": "00:0c:29:1c:e8:01",
                     "createdAt": "2011-12-19T15:28:46.493Z",
                     "finishedAt": null,
                     "status": "sent",
@@ -124,8 +125,8 @@ The response for GET has following attributes:
                   "resource", "/system/reboot",
                   "tunnel": "/remote",
                   "data": {},
-                  "__destination": "00:0c:29:1c:e8:02",
-                  "__task": {
+                  "__request": {
+                    "destination": "00:0c:29:1c:e8:02",
                     "createdAt": "2011-12-19T15:28:46.493Z",
                     "finishedAt": null,
                     "status": "sent",
@@ -139,8 +140,8 @@ The response for GET has following attributes:
                   "resource", "/system/reboot",
                   "tunnel": "/remote",
                   "data": {},
-                  "__destination": "00:0c:29:1c:e8:03",
-                  "__task": {
+                  "__request": {
+                    "destination": "00:0c:29:1c:e8:03",
                     "createdAt": "2011-12-19T15:28:46.493Z",
                     "finishedAt": null,
                     "status": "sent",
@@ -151,36 +152,46 @@ The response for GET has following attributes:
               ]
             }
 
-## Job WebSocket[/jobs/:id/ws]
+## Job WebSocket[/jobs/ws[/:id]]
+If a job object changed, it will sends job object immediately.
 
 + Response 200 (application/json)
 
     + Body
 
-            {
-              "TBD": "TBD"
-            }
+        {
+          "id": 123145,
+          "createdAt": "2011-12-19T15:28:46.493Z",
+          "finishedAt": null,
+          "timeout": 36000,
+          "status": "dispatching",
+          "progress": 0,
+          "totalCount": 3,
+          "finishCount": 0,
+          "errorCount": 0,
+          "requests": [3452, 365, 546345]
+        }
 
-## Task [/task/:id]
+## Request [/request/:id]
 
-Task is a command/data/event from server to client (one-to-one).
+Request is a command/data/event from server to client (one-to-one).
 
 ### Retrieve a job information [GET]
 
 The response for GET has following attributes:
 
-Basically, just extend original *Sanji Message (one-to-one)* with adding two properties: `__task`, `__destination` for dispatching/monitoring it.
+Basically, just extend original *Sanji Message (one-to-one)* with adding a property: `__request` for dispatching/monitoring it.
 
 - **id** (integer): Sanji Message ID.
 - **method** (enum): Sanji Message's method field.
 - **resource** (string): Sanji Message's resource field.
 - **data** (object): Sanji Message's data field.
-- **__destination** (string): This Sanji Message is belong to whom.
-- **__task.createdAt** (object): Creatation time of task.
-- **__task.finishedAt** (object): Finish time of task.
-- **__task.status** (object): Current status.
-- **__task.progress** (object): Progress.
-- **__task.result** (object): Result of this task.
+- **__request.destination** (string): This Sanji Message is belong to whom.
+- **__request.createdAt** (object): Creatation time of request.
+- **__request.finishedAt** (object): Finish time of request.
+- **__request.status** (object): Current status.
+- **__request.progress** (object): Progress.
+- **__request.result** (object): Result of this request.
 
 
 + Response 200 (application/json)
@@ -196,8 +207,8 @@ Basically, just extend original *Sanji Message (one-to-one)* with adding two pro
               "method": "post",
               "resource", "/system/reboot",
               "data": {},
-              "__destination": "00:0c:29:1c:e8:01",
-              "__task": {
+              "__request": {
+                "destination": "00:0c:29:1c:e8:01",
                 "createdAt": "2011-12-19T15:28:46.493Z",
                 "finishedAt": null,
                 "status": "sent",

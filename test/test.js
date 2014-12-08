@@ -1,6 +1,6 @@
 var should = require("should");
 var sinon = require("sinon");
-var Task = require("../lib/task");
+var Request = require("../lib/request");
 var Job = require("../lib/job");
 var Storage = require("../lib/storage");
 
@@ -15,17 +15,17 @@ var request = {
 
 var destinations = ["cg-000c291ce801", "cg-000c291ce802", "cg-000c291ce803"];
 
-describe("Task", function() {
-  describe("create a task", function() {
-    var t = new Task("cg-000c291ce801", request);
-    it("should return Task instance when passing cg-id string", function() {
-      t.should.be.instanceof(Task);
+describe("Request", function() {
+  describe("create a request", function() {
+    var t = new Request("cg-000c291ce801", request);
+    it("should return Request instance when passing cg-id string", function() {
+      t.should.be.instanceof(Request);
     });
 
-    it("should return Task when passing cg-id array (length 1)",
+    it("should return Request when passing cg-id array (length 1)",
       function() {
-        var t = new Task(["cg-000c291ce801"], request);
-        t.should.be.instanceof(Task);
+        var t = new Request(["cg-000c291ce801"], request);
+        t.should.be.instanceof(Request);
     });
 
     it("should have correct properties", function() {
@@ -33,43 +33,44 @@ describe("Task", function() {
       t.should.have.ownProperty("method").and.be.a.String;
       t.should.have.ownProperty("resource").and.be.a.String;
       t.should.have.ownProperty("data").and.be.a.Object;
-      t.should.have.ownProperty("__destination");
-      t.should.have.ownProperty("__task").and.be.a.Object;
-      t.should.have.propertyByPath("__task", "createdAt");
-      t.should.have.propertyByPath("__task", "finishedAt");
-      t.should.have.propertyByPath("__task", "status").and.be.a.String;
-      t.should.have.propertyByPath("__task", "progress").and.be.a.Number;
-      t.should.have.propertyByPath("__task", "result").and.be.null;
+      t.should.have.ownProperty("__request").and.be.a.Object;
+      t.should.have.propertyByPath("__request", "destination");
+      t.should.have.propertyByPath("__request", "createdAt");
+      t.should.have.propertyByPath("__request", "finishedAt");
+      t.should.have.propertyByPath("__request", "status").and.be.a.String;
+      t.should.have.propertyByPath("__request", "progress").and.be.a.Number;
+      t.should.have.propertyByPath("__request", "result").and.be.null;
     });
   });
 
-  describe("create 3 tasks", function() {
-    it("should return Array of Tasks when passing cg-id array" +
+  describe("create 3 requests", function() {
+    it("should return Array of Requests when passing cg-id array" +
       "(length > 1)", function() {
-      var ts = new Task(destinations, request);
-      ts.should.be.Array;
+      var ts = new Request(destinations, request);
+      ts.should.be.instanceof(Array);
       ts.forEach(function(t) {
-        t.should.be.Task;
+        t.should.be.Request;
       });
     });
   });
 
-  describe("dispatch tasks", function() {
-    var clock;
-    var ts;
+  describe("dispatch requests", function() {
+    var clock, ts;
+
     before(function () { clock = sinon.useFakeTimers(); });
     after(function () { clock.restore(); });
+
     beforeEach(function() {
-      ts = new Task(destinations, request);
+      ts = new Request(destinations, request);
     });
 
-    it("should be able to submit/resloved each task", function(done) {
+    it("should be able to submit/resloved each request", function(done) {
       var doneCount = 0;
-      var cb = function(err, task) {
+      var cb = function(err, request) {
         if (++doneCount === ts.length) {
           done();
         }
-        task.__task.status.should.be.equal("resloved");
+        request.__request.status.should.be.equal("resloved");
       };
 
       ts.forEach(function(t) {
@@ -82,18 +83,18 @@ describe("Task", function() {
       var spy = sinon.spy();
       t._timeoutCallback = function() { return spy; };
 
-      var cb = function(err, task) {
+      var cb = function(err, request) {
         clock.tick(36000);
         spy.called.should.be.false;
         should(err).be.null;
-        task.__task.status.should.be.equal("resloved");
+        request.__request.status.should.be.equal("resloved");
         done();
       };
 
       t.submit(cb);
     });
 
-    it("should be timeout if task exceeds limit time", function(done) {
+    it("should be timeout if request exceeds limit time", function(done) {
       var t = ts[0];
       // mock _send
       t._send = function(cb) {
@@ -102,9 +103,9 @@ describe("Task", function() {
         }, 36100);
       };
 
-      var cb = function(err, task) {
+      var cb = function(err, request) {
         if (err) {
-          task.__task.status.should.be.equal("timeout");
+          request.__request.status.should.be.equal("timeout");
           done();
           return;
         }
@@ -116,56 +117,58 @@ describe("Task", function() {
     });
   });
 
-  describe("save/load task", function() {
-    var t = new Task(destinations[0], request);
+  describe("to json", function() {
+    var t = new Request(destinations[0], request);
     it("should return correct properties", function() {
       var cb = function() {
-        var jsonString = t.json();
+        var jsonString = t.toJSON();
         var obj = JSON.parse(jsonString);
-        t.__task.should.have.ownProperty("timeoutTimer");
-        obj.__task.should.not.have.ownProperty("timeoutTimer");
+        t.__request.should.have.ownProperty("timeoutTimer");
+        obj.__request.should.not.have.ownProperty("timeoutTimer");
       };
       t.submit(cb);
     });
   });
-
 });
 
 describe("Job", function() {
-  // Create a request to enable cellular id: 1
+  var vaildFunc = function(j) {
+    j.should.have.ownProperty("id").and.be.a.Number;
+    j.should.have.ownProperty("createdAt");
+    j.should.have.ownProperty("finishedAt");
+    j.should.have.ownProperty("timeout").and.be.a.Number;
+    j.should.have.ownProperty("status").and.be.a.String;
+    j.should.have.ownProperty("progress").and.be.a.Number;
+    j.should.have.ownProperty("totalCount").and.be.a.Number;
+    j.should.have.ownProperty("doneCount").and.be.a.Number;
+    j.should.have.ownProperty("errorCount").and.be.a.Number;
+    j.should.have.ownProperty("requests").and.be.a.Array;
+  };
 
-  describe("create an empty Job", function() {
+  // Create a request to enable cellular id: 1
+  describe("create an empty one", function() {
     var j = new Job();
     it("should have correct properties", function() {
-      j.should.have.ownProperty("id").and.be.a.Number;
-      j.should.have.ownProperty("createdAt");
-      j.should.have.ownProperty("finishedAt");
-      j.should.have.ownProperty("timeout").and.be.a.Number;
-      j.should.have.ownProperty("status").and.be.a.String;
-      j.should.have.ownProperty("progress").and.be.a.Number;
-      j.should.have.ownProperty("totalCount").and.be.a.Number;
-      j.should.have.ownProperty("doneCount").and.be.a.Number;
-      j.should.have.ownProperty("errorCount").and.be.a.Number;
-      j.should.have.ownProperty("collection").and.be.a.Array;
+      vaildFunc(j);
     });
 
     it("should have collection length = 0", function() {
-      j.collection.should.be.lengthOf(0);
+      j.requests.should.be.lengthOf(0);
     });
   });
 
-  describe("create a job with a single task", function() {
+  describe("create a job with a single request", function() {
     var j = new Job("cg-000c291ce801", request);
-    it("should return collection with 1 task", function() {
-      j.collection.should.be.lengthOf(1);
+    it("should return collection with 1 request", function() {
+      j.requests.should.be.lengthOf(1);
       j.totalCount.should.be.equal(1);
     });
 
-    it("should be able to submit all tasks and update status/progress",
+    it("should be able to submit all requests and update status/progress",
       function(done) {
         var cb = function(err, job) {
           should(err).be.null;
-          job.collection[0].__task.status.should.be.equal("resloved");
+          job.requests[0].__request.status.should.be.equal("resloved");
           job.doneCount.should.be.equal(1);
           job.errorCount.should.be.equal(0);
           job.progress.should.be.equal(100);
@@ -175,19 +178,19 @@ describe("Job", function() {
     });
   });
 
-  describe("create a job with 3 tasks", function() {
+  describe("create a job with 3 requests", function() {
     var j = new Job(destinations, request);
-    it("should return collection with 3 task", function() {
-      j.collection.should.be.lengthOf(3);
+    it("should return collection with 3 request", function() {
+      j.requests.should.be.lengthOf(3);
       j.totalCount.should.be.equal(3);
     });
 
-    it("should be able to submit all tasks and update status/progress",
+    it("should be able to submit all requests and update status/progress",
       function(done) {
         var cb = function(err, job) {
           should(err).be.null;
-          job.collection.forEach(function(task) {
-            task.__task.status.should.be.equal("resloved");
+          job.requests.forEach(function(request) {
+            request.__request.status.should.be.equal("resloved");
           });
           job.doneCount.should.be.equal(3);
           job.errorCount.should.be.equal(0);
@@ -198,11 +201,11 @@ describe("Job", function() {
     });
   });
 
-  describe("submit all tasks in job with error", function() {
+  describe("submit all requests in job with error", function() {
     it("should increase errorCount", function(done) {
       var j = new Job(destinations, request);
-      j.collection[0]._send = function(cb) {
-        cb("error", j.collection[0]);
+      j.requests[0]._send = function(cb) {
+        cb("error", j.requests[0]);
       };
 
       var cb = function(err, job) {
@@ -218,9 +221,9 @@ describe("Job", function() {
 
   describe("update status immediately", function() {
     var j = new Job(destinations, request);
-    it("should update *counts when tasks updated", function(done) {
-      j.collection[0]._send = function(cb) {
-        cb("error", j.collection[0]);
+    it("should update *counts when requests updated", function(done) {
+      j.requests[0]._send = function(cb) {
+        cb("error", j.requests[0]);
       };
       var spy = sinon.spy();
       var doneCb = function() {
@@ -228,9 +231,9 @@ describe("Job", function() {
         done();
       };
 
-      var updateCb = function(err, task) {
+      var updateCb = function(err, request) {
         if (err) {
-          task.__task.status.should.be.equal("error");
+          request.__request.status.should.be.equal("error");
           j.errorCount.should.not.equal(0);
         }
         spy();
@@ -239,6 +242,28 @@ describe("Job", function() {
       j.submitAll(doneCb, updateCb);
     });
   });
+
+  describe("to json", function() {
+    var j = new Job(destinations, request);
+    it("should return json string", function() {
+      var obj = JSON.parse(j.toJSON());
+      vaildFunc(obj);
+    });
+  });
+
+  describe("save/load", function() {
+    var j = new Job(destinations, request);
+    var filename;
+    it("should be able to save as a file", function() {
+      filename = j.save("/tmp");
+    });
+
+    it("should be able to load as a file", function() {
+      j.load(filename);
+    });
+
+  });
+
 });
 
 describe("Storage", function() {
