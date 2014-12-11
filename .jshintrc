@@ -22,7 +22,7 @@
     "google": false,
     "jQuery": false,
     "$": false,
-    "_": false,
+    "_": true,
     /* MOCHA */
     "describe": false,
     "it": false,

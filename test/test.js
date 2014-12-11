@@ -17,15 +17,9 @@ var destinations = ["cg-000c291ce801", "cg-000c291ce802", "cg-000c291ce803"];
 
 describe("Request", function() {
   describe("create a request", function() {
-    var t = new Request("cg-000c291ce801", request);
+    var t = new Request({destination: "cg-000c291ce801", message: request});
     it("should return Request instance when passing cg-id string", function() {
       t.should.be.instanceof(Request);
-    });
-
-    it("should return Request when passing cg-id array (length 1)",
-      function() {
-        var t = new Request(["cg-000c291ce801"], request);
-        t.should.be.instanceof(Request);
     });
 
     it("should have correct properties", function() {
@@ -43,45 +37,29 @@ describe("Request", function() {
     });
   });
 
-  describe("create 3 requests", function() {
-    it("should return Array of Requests when passing cg-id array" +
-      "(length > 1)", function() {
-      var ts = new Request(destinations, request);
-      ts.should.be.instanceof(Array);
-      ts.forEach(function(t) {
-        t.should.be.Request;
-      });
-    });
-  });
 
-  describe("dispatch requests", function() {
+  describe("dispatch a request", function() {
     var clock, ts;
 
     before(function () { clock = sinon.useFakeTimers(); });
     after(function () { clock.restore(); });
 
     beforeEach(function() {
-      ts = new Request(destinations, request);
+      ts = new Request({destination: destinations[0], message: request});
     });
 
-    it("should be able to submit/resloved each request", function(done) {
-      var doneCount = 0;
+    it("should be able to submit/resloved", function(done) {
       var cb = function(err, request) {
-        if (++doneCount === ts.length) {
-          done();
-        }
         request.__request.status.should.be.equal("resloved");
+        done(err);
       };
 
-      ts.forEach(function(t) {
-        t.submit(cb);
-      });
+      ts.submit(cb);
     });
 
     it("should be done and then cancel timeout timer", function(done) {
-      var t = ts[0];
       var spy = sinon.spy();
-      t._timeoutCallback = function() { return spy; };
+      ts._timeoutCallback = function() { return spy; };
 
       var cb = function(err, request) {
         clock.tick(36000);
@@ -91,15 +69,14 @@ describe("Request", function() {
         done();
       };
 
-      t.submit(cb);
+      ts.submit(cb);
     });
 
     it("should be timeout if request exceeds limit time", function(done) {
-      var t = ts[0];
       // mock _send
-      t._send = function(cb) {
+      ts._send = function(cb) {
         setTimeout(function() {
-          cb.call(t, null, t);
+          cb.call(ts, null, ts);
         }, 36100);
       };
 
@@ -112,17 +89,16 @@ describe("Request", function() {
         err.should.be.equal("timeout");
       };
 
-      t.submit(cb);
+      ts.submit(cb);
       clock.tick(36000);
     });
   });
 
   describe("to json", function() {
-    var t = new Request(destinations[0], request);
+    var t = new Request({destination: destinations[0], message: request});
     it("should return correct properties", function() {
       var cb = function() {
-        var jsonString = t.toJSON();
-        var obj = JSON.parse(jsonString);
+        var obj = t.toJSON();
         t.__request.should.have.ownProperty("timeoutTimer");
         obj.__request.should.not.have.ownProperty("timeoutTimer");
       };
@@ -158,7 +134,7 @@ describe("Job", function() {
   });
 
   describe("create a job with a single request", function() {
-    var j = new Job("cg-000c291ce801", request);
+    var j = new Job({destinations: "cg-000c291ce801", message: request});
     it("should return collection with 1 request", function() {
       j.requests.should.be.lengthOf(1);
       j.totalCount.should.be.equal(1);
@@ -179,7 +155,7 @@ describe("Job", function() {
   });
 
   describe("create a job with 3 requests", function() {
-    var j = new Job(destinations, request);
+    var j = new Job({destinations: destinations, message: request});
     it("should return collection with 3 request", function() {
       j.requests.should.be.lengthOf(3);
       j.totalCount.should.be.equal(3);
@@ -203,7 +179,7 @@ describe("Job", function() {
 
   describe("submit all requests in job with error", function() {
     it("should increase errorCount", function(done) {
-      var j = new Job(destinations, request);
+      var j = new Job({destinations: destinations, message: request});
       j.requests[0]._send = function(cb) {
         cb("error", j.requests[0]);
       };
@@ -220,7 +196,7 @@ describe("Job", function() {
   });
 
   describe("update status immediately", function() {
-    var j = new Job(destinations, request);
+    var j = new Job({destinations: destinations, message: request});
     it("should update *counts when requests updated", function(done) {
       j.requests[0]._send = function(cb) {
         cb("error", j.requests[0]);
@@ -244,15 +220,15 @@ describe("Job", function() {
   });
 
   describe("to json", function() {
-    var j = new Job(destinations, request);
+    var j = new Job({destinations: destinations, message: request});
     it("should return json string", function() {
-      var obj = JSON.parse(j.toJSON());
+      var obj = j.toJSON();
       vaildFunc(obj);
     });
   });
 
   describe("save/load", function() {
-    var j = new Job(destinations, request);
+    var j = new Job({destinations: destinations, message: request});
     var filename;
     it("should be able to save as a file", function() {
       filename = j.save("/tmp");

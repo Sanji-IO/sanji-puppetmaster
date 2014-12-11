@@ -24,15 +24,20 @@
   },
   "homepage": "https://github.com/Sanji-IO/sanji-puppetmaster",
   "devDependencies": {
+    "body-parser": "^1.10.0",
     "coveralls": "^2.11.2",
     "istanbul": "^0.3.2",
     "mocha": "^1.21.5",
     "mocha-lcov-reporter": "0.0.1",
     "should": "^4.0.4",
-    "sinon": "^1.10.3"
+    "sinon": "^1.10.3",
+    "supertest": "^0.15.0"
   },
   "dependencies": {
+    "express": "^4.10.5",
     "json-stringify-safe": "^5.0.0",
-    "moment": "^2.8.3"
+    "lodash": "^2.4.1",
+    "moment": "^2.8.3",
+    "sanji-logger": "0.0.1"
   }
 }
