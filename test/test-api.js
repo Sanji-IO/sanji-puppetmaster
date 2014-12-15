@@ -24,7 +24,7 @@ function makeMockPromise(resource, data) {
 
 describe('PuppetMaster', function() {
 
-  var app, pm, reqData, reqRequestData,
+  var app, pm, reqJobData, reqRequestData,
       BUNDLES_HOME = __dirname;
 
   beforeEach(function() {
@@ -34,13 +34,13 @@ describe('PuppetMaster', function() {
     app.use(pm);
     pm = pm.puppetmaster;
 
-    reqData = {
-      destinations: 'AA-BB-CC-DD-11-22',
+    reqJobData = {
+      destinations: ['AA-BB-CC-DD-11-22', 'BB-CC-DD-EE-11-22'],
       message: {
         method: 'get',
         resource: '/system/status',
         data: {
-          test: 'reqData'
+          test: 'reqJobData'
         }
       }
     };
@@ -56,15 +56,12 @@ describe('PuppetMaster', function() {
       }
     };
 
-    // ['get', 'post', 'put', 'delete'].forEach(function(method) {
-    //   se.bundle.publish[method] = makeMockPromise;
-    // });
   });
 
   describe('Job API Endpoints', function() {
 
     beforeEach(function(done) {
-      request(app).post('/jobs').send(reqData).expect(200).end(done);
+      request(app).post('/jobs').send(reqJobData).expect(200).end(done);
     });
 
     it('[Get] /jobs should get all jobs (one)', function(done) {
@@ -84,8 +81,8 @@ describe('PuppetMaster', function() {
 
     it('[Get] /jobs/:id should be able to get a job by id', function(done) {
       request(app)
-        .get('/jobs/' + Object.keys(pm.jobs)[0])
-        .send(reqData)
+        .get('/jobs/' + Object.keys(pm._jobs)[0])
+        .send(reqJobData)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(done);
@@ -102,14 +99,14 @@ describe('PuppetMaster', function() {
     it('[Post] /jobs should be able to create a job with a request', function(done) {
       request(app)
         .post('/jobs')
-        .send(reqData)
+        .send(reqJobData)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if (err) {
             return done(err);
           }
-          should(pm.jobs[res.body.id]).be.exist;
+          should(pm._jobs[res.body.id]).be.exist;
           done();
         });
     });
@@ -119,7 +116,7 @@ describe('PuppetMaster', function() {
   describe('Request API Endpoints', function() {
 
     beforeEach(function(done) {
-      request(app).post('/jobs').send(reqData).expect(200).end(done);
+      request(app).post('/jobs').send(reqJobData).expect(200).end(done);
     });
 
     it('[Get] /requests/:id should be able to get arequest by id', function(done) {
@@ -149,10 +146,14 @@ describe('PuppetMaster', function() {
     it('[Post] /requests should be able to create a request', function(done) {
       request(app)
         .post('/requests')
-        .send(reqData)
+        .send(reqJobData)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          pm._requests[res.body.id].should.be.eql(res.body);
           done();
         });
     });

@@ -4,37 +4,42 @@ var _ = require('lodash'),
     Request = require('./lib/request'),
     PuppetMaster;
 
-PuppetMaster = function PuppetMaster() {
+PuppetMaster = function PuppetMaster(io) {
 
   if (!(this instanceof PuppetMaster)) {
-    return new PuppetMaster();
+    return new PuppetMaster(io);
   }
 
-  this.jobs = {};
-  this.requests = {};
+  // jobs and requests
+  this._jobs = {};
+  this._requests = {};
+  this._io = io;
 
   // setup routing paths
-  this.router = express.Router();
-  this.router.route('/jobs')
+  var router = express.Router();
+
+  // Job
+  router.route('/jobs')
     .get(this.getAllJobs.bind(this))
     .post(this.createJob.bind(this));
 
-  this.router.route('/jobs/:id')
+  router.route('/jobs/:id')
     .get(this.getOneJob.bind(this));
 
-  this.router.route('/requests')
+  // Request
+  router.route('/requests')
     .post(this.createRequest.bind(this));
 
-  this.router.route('/requests/:id')
+  router.route('/requests/:id')
     .get(this.getOneRequest.bind(this));
 
-  this.router.puppetmaster = this;
+  router.puppetmaster = this;
 
-  return this.router;
+  return router;
 };
 
 PuppetMaster.prototype.getAllJobs = function getAllJobs(req, res) {
-  return res.json(_.values(this.jobs));
+  return res.json(_.values(this._jobs));
 };
 
 PuppetMaster.prototype.createJob = function createJob(req, res) {
@@ -43,16 +48,16 @@ PuppetMaster.prototype.createJob = function createJob(req, res) {
       job;
 
   job = new Job(data);
-  this.jobs[job.id] = job;
+  this._jobs[job.id] = job;
   job.requests.forEach(function(request) {
-    self.requests[request.id] = request;
+    self._requests[request.id] = request;
   });
 
   return res.json(job);
 };
 
 PuppetMaster.prototype.getOneJob = function getOneJob(req, res) {
-  var job = this.jobs[Number(req.params.id)];
+  var job = this._jobs[Number(req.params.id)];
 
   if (!job) {
     return res.status(404).json(
@@ -70,14 +75,13 @@ PuppetMaster.prototype.createRequest = function createRequest(req, res) {
       request;
 
   request = new Request(data);
-  this.requests[request.id] = request;
+  this._requests[request.id] = request;
 
   return res.json(request);
 };
 
-
 PuppetMaster.prototype.getOneRequest = function getOneRequest(req, res) {
-  var request = this.requests[Number(req.params.id)];
+  var request = this._requests[Number(req.params.id)];
 
   if (!request) {
     return res.status(404).json(
