@@ -1,36 +1,65 @@
 var log = require('sanji-logger')('puppetmaster-test'),
-    path = require('path'),
     should = require('should'),
     // sinon = require('sinon'),
+    _ = require('lodash'),
     request = require('supertest'),
     express = require('express'),
     PuppetMaster = require('../index'),
-    // Promise = require('bluebird'),
-    // rimraf = require('rimraf'),
-    fs = require('fs');
+    Promise = require('bluebird'),
+    ioc = require('socket.io-client');
 
-
-function makeMockPromise(resource, data) {
+function makeMockPromise(resource, data, dest) {
   return new Promise(function (resolve) {
     return resolve({
       code: 200,
       data: {
         resource: resource,
-        data: data
+        data: data,
+        destination: dest
       }
     });
   });
 }
 
+function client(srv, nsp, opts){
+  if ('object' === typeof nsp) {
+    opts = nsp;
+    nsp = null;
+  }
+  var addr = srv.address();
+  if (!addr) {
+    addr = srv.listen().address();
+  }
+  var url = 'ws://' + addr.address + ':' + addr.port + (nsp || '');
+  return ioc(url, opts);
+}
+
 describe('PuppetMaster', function() {
 
-  var app, pm, reqJobData, reqRequestData,
+  var server, app, pm, reqJobData, reqRequestData, bundle, io, ioclient,
       BUNDLES_HOME = __dirname;
 
   beforeEach(function() {
     app = express();
     app.use(require('body-parser').json());
-    pm = PuppetMaster();
+
+    bundle = {
+      publish: {
+        direct: {}
+      }
+    };
+
+    ['get', 'post', 'put', 'delete'].forEach(function(method) {
+      bundle.publish.direct[method] = makeMockPromise;
+    });
+
+    // setup socket.io
+    server = require('http').Server(app);
+    io = require('socket.io')(server);
+    ioclient = client(server);
+
+    pm = PuppetMaster(bundle, io);
+
     app.use(pm);
     pm = pm.puppetmaster;
 
@@ -55,13 +84,15 @@ describe('PuppetMaster', function() {
         }
       }
     };
-
   });
 
   describe('Job API Endpoints', function() {
 
     beforeEach(function(done) {
       request(app).post('/jobs').send(reqJobData).expect(200).end(done);
+    });
+
+    afterEach(function() {
     });
 
     it('[Get] /jobs should get all jobs (one)', function(done) {
@@ -106,8 +137,20 @@ describe('PuppetMaster', function() {
           if (err) {
             return done(err);
           }
+
           should(pm._jobs[res.body.id]).be.exist;
-          done();
+
+          var count = {
+            '/jobs/update': 2,
+            '/jobs': 1
+          };
+
+          ioclient.on('change', function(data) {
+            --count[data.resource];
+            if (!count['/jobs/update'] && !count['/jobs']) {
+              done();
+            }
+          });
         });
     });
 
@@ -120,16 +163,16 @@ describe('PuppetMaster', function() {
     });
 
     it('[Get] /requests/:id should be able to get arequest by id', function(done) {
-      request(app).get('/jobs').expect(200).expect('Content-Type', /json/).end(function(err, res) {
+      request(app).get('/requests').expect(200).expect('Content-Type', /json/).end(function(err, res) {
         request(app)
-          .get('/requests/' + res.body[0].requests[0].id)
+          .get('/requests/' + res.body[0].id)
           .expect(200)
           .expect('Content-Type', /json/)
           .end(function(err, _res) {
             if (err) {
               done(err);
             }
-            _res.body.id.should.be.equal(res.body[0].requests[0].id);
+            _res.body.id.should.be.equal(res.body[0].id);
             done();
           });
       });
@@ -153,8 +196,16 @@ describe('PuppetMaster', function() {
           if (err) {
             return done(err);
           }
-          pm._requests[res.body.id].should.be.eql(res.body);
-          done();
+
+          var source = pm._requests[res.body.id];
+          source.id.should.be.eql(res.body.id);
+          source.method.should.be.eql(res.body.method);
+          source.resource.should.be.eql(res.body.resource);
+          source.resource.should.be.eql(res.body.resource);
+
+          ioclient.once('change', function() {
+            done();
+          });
         });
     });
   });

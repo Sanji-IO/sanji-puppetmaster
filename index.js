@@ -2,21 +2,26 @@ var _ = require('lodash'),
     express = require('express'),
     Job = require('./lib/job'),
     Request = require('./lib/request'),
+    logger = require('sanji-logger')('PuppetMaster'),
     PuppetMaster;
 
-PuppetMaster = function PuppetMaster(io) {
+PuppetMaster = function PuppetMaster(bundle, io) {
 
   if (!(this instanceof PuppetMaster)) {
-    return new PuppetMaster(io);
+    return new PuppetMaster(bundle, io);
   }
 
   // jobs and requests
   this._jobs = {};
   this._requests = {};
-  this._io = io;
+  this.io = io;
+  this.bundle = bundle;
 
   // setup routing paths
   var router = express.Router();
+
+  router.post('/jobs', this.initializeRequest.bind(this));
+  router.post('/requests', this.initializeRequest.bind(this));
 
   // Job
   router.route('/jobs')
@@ -28,6 +33,7 @@ PuppetMaster = function PuppetMaster(io) {
 
   // Request
   router.route('/requests')
+    .get(this.getAllRequests.bind(this))
     .post(this.createRequest.bind(this));
 
   router.route('/requests/:id')
@@ -36,6 +42,21 @@ PuppetMaster = function PuppetMaster(io) {
   router.puppetmaster = this;
 
   return router;
+};
+
+PuppetMaster.prototype.initializeRequest = function(req, res, next) {
+
+  if (req.body.formData) {
+    req.body = JSON.parse(req.body.formData);
+  }
+
+  if (req.mqttData && req.mqttData.data._file.publicLink) {
+    req.body.message.data._file = req.mqttData.data._file;
+  }
+
+  req.bundle = this.bundle;
+
+  next();
 };
 
 PuppetMaster.prototype.getAllJobs = function getAllJobs(req, res) {
@@ -49,11 +70,18 @@ PuppetMaster.prototype.createJob = function createJob(req, res) {
 
   job = new Job(data);
   this._jobs[job.id] = job;
+
   job.requests.forEach(function(request) {
     self._requests[request.id] = request;
   });
 
-  return res.json(job);
+  res.json(job);
+
+  job.submitAll(
+      req.bundle,
+      this.changeEventFn(req.url).bind(this),
+      this.changeEventFn(req.url + '/update').bind(this)
+    );
 };
 
 PuppetMaster.prototype.getOneJob = function getOneJob(req, res) {
@@ -77,7 +105,13 @@ PuppetMaster.prototype.createRequest = function createRequest(req, res) {
   request = new Request(data);
   this._requests[request.id] = request;
 
-  return res.json(request);
+  res.json(request);
+
+  request
+    .submit(
+      req.bundle,
+      this.changeEventFn(req.url).bind(this)
+    );
 };
 
 PuppetMaster.prototype.getOneRequest = function getOneRequest(req, res) {
@@ -91,5 +125,19 @@ PuppetMaster.prototype.getOneRequest = function getOneRequest(req, res) {
   return res.json(request);
 };
 
+PuppetMaster.prototype.getAllRequests = function getAllRequests(req, res) {
+  return res.json(_.values(this._requests));
+};
+
+PuppetMaster.prototype.changeEventFn = function changeEventFn(resource) {
+  var self = this;
+  return function(err, result) {
+    self.io.emit('change', {
+      resource: resource,
+      data: result
+    });
+    logger.trace('emit change event');
+  };
+};
 
 module.exports = PuppetMaster;
