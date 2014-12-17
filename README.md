@@ -4,12 +4,6 @@
 
 sanji-puppetmaster [![Build Status](https://travis-ci.org/Sanji-IO/sanji-puppetmaster.svg)](https://travis-ci.org/Sanji-IO/sanji-puppetmaster) [![Coverage Status](https://coveralls.io/repos/Sanji-IO/sanji-puppetmaster/badge.png?branch=develop)](https://coveralls.io/r/Sanji-IO/sanji-puppetmaster?branch=develop)
 ==================
-```
-                  ___  _  _ ___  ___  ____ ___ _  _ ____ ____ ___ ____ ____
-                  |__] |  | |__] |__] |___  |  |\/| |__| [__   |  |___ |__/
-                  |    |__| |    |    |___  |  |  | |  | ___]  |  |___ |  \
-
-```
 
 Process batch command/data/event from server to clients.
 
