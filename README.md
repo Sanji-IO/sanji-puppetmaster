@@ -2,8 +2,9 @@
     <img src="http://upload.wikimedia.org/wikipedia/commons/1/16/Godfather_puppetmaster.jpg" align="right" />
 </a>
 
-sanji-puppetmaster [![Build Status](https://travis-ci.org/Sanji-IO/sanji-puppetmaster.svg)](https://travis-ci.org/Sanji-IO/sanji-puppetmaster) [![Coverage Status](https://coveralls.io/repos/Sanji-IO/sanji-puppetmaster/badge.png?branch=develop)](https://coveralls.io/r/Sanji-IO/sanji-puppetmaster?branch=develop)
+sanji-puppetmaster
 ==================
+[![Build Status](https://travis-ci.org/Sanji-IO/sanji-puppetmaster.svg)](https://travis-ci.org/Sanji-IO/sanji-puppetmaster) [![Coverage Status](https://coveralls.io/repos/Sanji-IO/sanji-puppetmaster/badge.png?branch=develop)](https://coveralls.io/r/Sanji-IO/sanji-puppetmaster?branch=develop)
 
 Process batch command/data/event from server to clients.
 
@@ -16,7 +17,7 @@ Endpoints
 
 ### [Requests](#requests-collection-requests)
 - **/requests** [GET] List current requests.
-- **/requests** [POST] Create request information.
+- **/requests** [POST] Create a request to destination.
 - **/requests/:id** [GET] Get a request's information by id.
 
 RESTful API
@@ -86,90 +87,89 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
 
     + Body
 
-        [
-          {
-            "id": 123145,
-            "createdAt": "2014-12-17T06:27:58.220Z",
-            "finishedAt": null,
-            "timeout": 36000,
-            "status": "dispatching",
-            "progress": 0,
-            "totalCount": 3,
-            "finishCount": 0,
-            "errorCount": 0,
-            "requests": [
+            [
               {
-                "id": 8330,
-                "method": "post",
-                "resource": "/system/reboot",
-                "__request": {
-                  "destination": "00:0c:29:1c:e8:01",
-                  "createdAt": "2014-12-17T06:27:58.220Z",
-                  "finishedAt": null,
-                  "timeout": 36000,
-                  "status": "created",
-                  "progress": 0,
-                  "result": {}
-                }
+                "id": 123145,
+                "createdAt": "2014-12-17T06:27:58.220Z",
+                "finishedAt": null,
+                "timeout": 36000,
+                "status": "dispatching",
+                "progress": 0,
+                "totalCount": 3,
+                "finishCount": 0,
+                "errorCount": 0,
+                "requests": [
+                  {
+                    "id": 8330,
+                    "method": "post",
+                    "resource": "/system/reboot",
+                    "__request": {
+                      "destination": "00:0c:29:1c:e8:01",
+                      "createdAt": "2014-12-17T06:27:58.220Z",
+                      "finishedAt": null,
+                      "timeout": 36000,
+                      "status": "created",
+                      "progress": 0,
+                      "result": {}
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 345235,
+                "createdAt": "2014-12-17T06:27:58.220Z",
+                "finishedAt": null,
+                "timeout": 36000,
+                "status": "dispatching",
+                "progress": 0,
+                "totalCount": 3,
+                "finishCount": 0,
+                "errorCount": 0,
+                "requests": [
+                  {
+                    "id": 34534,
+                    "method": "post",
+                    "resource": "/system/reboot",
+                    "__request": {
+                      "destination": "00:0c:29:1c:e8:02",
+                      "createdAt": "2014-12-17T06:27:58.220Z",
+                      "finishedAt": null,
+                      "timeout": 36000,
+                      "status": "created",
+                      "progress": 0,
+                      "result": {}
+                    }
+                  }
+                ]
+              },
+              {
+                "id": 324234,
+                "createdAt": "2014-12-17T06:27:58.220Z",
+                "finishedAt": null,
+                "timeout": 36000,
+                "status": "dispatching",
+                "progress": 0,
+                "totalCount": 3,
+                "finishCount": 0,
+                "errorCount": 0,
+                "requests": [
+                  {
+                    "id": 2323,
+                    "method": "post",
+                    "resource": "/system/reboot",
+                    "__request": {
+                      "destination": "00:0c:29:1c:e8:03",
+                      "createdAt": "2014-12-17T06:27:58.220Z",
+                      "finishedAt": null,
+                      "timeout": 36000,
+                      "status": "created",
+                      "progress": 0,
+                      "result": null
+                    }
+                  }
+                ]
               }
             ]
-          },
-          {
-            "id": 345235,
-            "createdAt": "2014-12-17T06:27:58.220Z",
-            "finishedAt": null,
-            "timeout": 36000,
-            "status": "dispatching",
-            "progress": 0,
-            "totalCount": 3,
-            "finishCount": 0,
-            "errorCount": 0,
-            "requests": [
-              {
-                "id": 34534,
-                "method": "post",
-                "resource": "/system/reboot",
-                "__request": {
-                  "destination": "00:0c:29:1c:e8:02",
-                  "createdAt": "2014-12-17T06:27:58.220Z",
-                  "finishedAt": null,
-                  "timeout": 36000,
-                  "status": "created",
-                  "progress": 0,
-                  "result": {}
-                }
-              }
-            ]
-          },
-          {
-            "id": 324234,
-            "createdAt": "2014-12-17T06:27:58.220Z",
-            "finishedAt": null,
-            "timeout": 36000,
-            "status": "dispatching",
-            "progress": 0,
-            "totalCount": 3,
-            "finishCount": 0,
-            "errorCount": 0,
-            "requests": [
-              {
-                "id": 2323,
-                "method": "post",
-                "resource": "/system/reboot",
-                "__request": {
-                  "destination": "00:0c:29:1c:e8:03",
-                  "createdAt": "2014-12-17T06:27:58.220Z",
-                  "finishedAt": null,
-                  "timeout": 36000,
-                  "status": "created",
-                  "progress": 0,
-                  "result": null
-                }
-              }
-            ]
-          }
-        ]
-
 
 ## Job [/jobs/:id]
 Single job information
@@ -253,7 +253,7 @@ Request is a command/data/event from server to client (one-to-one).
 
 ### Create a request [POST]
 The request for POST has following attributes:
-- **destination** (required, string): Create request for whom (one). If you want to send to many please create a **Job**.
+- **destination** (optional, string): Create request for whom (default: localhost). If you want to send to many please create a **Job**.
 - **message** (required, SanjiMessage): A standard Sanji Message(request) must include `method`, `resource`
 
 The response for POST has following attributes:
