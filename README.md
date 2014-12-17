@@ -108,7 +108,7 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
                       "timeout": 36000,
                       "status": "created",
                       "progress": 0,
-                      "result": {}
+                      "result": null
                     }
                   }
                 ]
@@ -135,7 +135,7 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
                       "timeout": 36000,
                       "status": "created",
                       "progress": 0,
-                      "result": {}
+                      "result": null
                     }
                   }
                 ]
