@@ -209,7 +209,7 @@ The response for GET has following attributes:
 A set of Requests meta information.
 
 
-### Retrieve jobs [GET]
+### Retrieve Request [GET]
 Get all current exist jobs.
 
 + Response 200 (application/json)
