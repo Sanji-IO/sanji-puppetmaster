@@ -70,6 +70,8 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
 
 + Request  (application/json)
 
+    + Body
+
         {
           "destinations": ["00:0c:29:1c:e8:01", "00:0c:29:1c:e8:02", "00:0c:29:1c:e8:03"],
           "message": [
@@ -81,6 +83,8 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
         }
 
 + Response 200 (application/json)
+
+    + Body
 
         [
           {
@@ -212,36 +216,36 @@ Get all current exist jobs.
 
     + Body
 
-          [
-            {
-              "id": 2323,
-              "method": "post",
-              "resource": "/system/reboot",
-              "__request": {
-                "destination": "00:0c:29:1c:e8:03",
-                "createdAt": "2014-12-17T06:27:58.220Z",
-                "finishedAt": null,
-                "timeout": 36000,
-                "status": "created",
-                "progress": 0,
-                "result": null
+            [
+              {
+                "id": 2323,
+                "method": "post",
+                "resource": "/system/reboot",
+                "__request": {
+                  "destination": "00:0c:29:1c:e8:03",
+                  "createdAt": "2014-12-17T06:27:58.220Z",
+                  "finishedAt": null,
+                  "timeout": 36000,
+                  "status": "created",
+                  "progress": 0,
+                  "result": null
+                }
+              },
+              {
+                "id": 12414,
+                "method": "post",
+                "resource": "/system/reboot",
+                "__request": {
+                  "destination": "00:0c:29:1c:e8:04",
+                  "createdAt": "2014-12-17T06:27:58.220Z",
+                  "finishedAt": null,
+                  "timeout": 36000,
+                  "status": "created",
+                  "progress": 0,
+                  "result": null
+                }
               }
-            },
-            {
-              "id": 12414,
-              "method": "post",
-              "resource": "/system/reboot",
-              "__request": {
-                "destination": "00:0c:29:1c:e8:04",
-                "createdAt": "2014-12-17T06:27:58.220Z",
-                "finishedAt": null,
-                "timeout": 36000,
-                "status": "created",
-                "progress": 0,
-                "result": null
-              }
-            }
-          ]
+            ]
 
 
 ## Request [/request/:id]
@@ -278,19 +282,17 @@ Basically, just extend original *Sanji Message (one-to-one)* with adding a prope
 
     + Body
 
-          {
-            "id": 2323,
-            "method": "post",
-            "resource": "/system/reboot",
-            "__request": {
-              "destination": "00:0c:29:1c:e8:03",
-              "createdAt": "2014-12-17T06:27:58.220Z",
-              "finishedAt": null,
-              "timeout": 36000,
-              "status": "created",
-              "progress": 0,
-              "result": null
+            {
+              "id": 2323,
+              "method": "post",
+              "resource": "/system/reboot",
+              "__request": {
+                "destination": "00:0c:29:1c:e8:03",
+                "createdAt": "2014-12-17T06:27:58.220Z",
+                "finishedAt": null,
+                "timeout": 36000,
+                "status": "created",
+                "progress": 0,
+                "result": null
+              }
             }
-          }
-
-.
