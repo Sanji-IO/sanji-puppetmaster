@@ -73,15 +73,13 @@ Reboot 3 devices `00:0c:29:1c:e8:01`, `00:0c:29:1c:e8:02`, `00:0c:29:1c:e8:03` a
 
     + Body
 
-        {
-          "destinations": ["00:0c:29:1c:e8:01", "00:0c:29:1c:e8:02", "00:0c:29:1c:e8:03"],
-          "message": [
             {
-              "method": "post",
-              "resource": "/system/reboot"
+              "destinations": ["00:0c:29:1c:e8:01", "00:0c:29:1c:e8:02", "00:0c:29:1c:e8:03"],
+              "message": {
+                "method": "post",
+                "resource": "/system/reboot"
+              }
             }
-          ]
-        }
 
 + Response 200 (application/json)
 
