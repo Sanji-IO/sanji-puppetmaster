@@ -50,7 +50,8 @@ PuppetMaster.prototype.initializeRequest = function(req, res, next) {
     req.body = JSON.parse(req.body.formData);
   }
 
-  if (req.mqttData && req.mqttData.data._file.publicLink) {
+  if (req.mqttData && req.mqttData.data && req.mqttData.data._file) {
+    req.body.message.data = req.body.message.data || {};
     req.body.message.data._file = req.mqttData.data._file;
   }
 
