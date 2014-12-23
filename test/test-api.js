@@ -145,7 +145,7 @@ describe('PuppetMaster', function() {
             '/jobs': 1
           };
 
-          ioclient.on('change', function(data) {
+          ioclient.on('sanji.puppetmaster', function(data) {
             --count[data.resource];
             if (!count['/jobs/update'] && !count['/jobs']) {
               done();
@@ -213,7 +213,7 @@ describe('PuppetMaster', function() {
           source.resource.should.be.eql(res.body.resource);
           source.resource.should.be.eql(res.body.resource);
 
-          ioclient.once('change', function() {
+          ioclient.once('sanji.puppetmaster', function() {
             done();
           });
         });
