@@ -203,7 +203,6 @@ describe('PuppetMaster', function() {
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if (err) {
-            console.log(err);
             return done(err);
           }
 

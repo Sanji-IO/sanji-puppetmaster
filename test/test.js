@@ -280,10 +280,19 @@ describe('Job', function() {
   });
 
   describe('save/load', function() {
-    var j = new Job({destinations: destinations, message: request});
-    var filename;
+    var j = new Job({destinations: destinations, message: request}),
+        rimraf = require('rimraf'),
+        fs = require('fs'),
+        filename;
+
+    beforeEach(function(done) {
+      fs.mkdir('/tmp/puppetmaster', function() {
+        done();
+      });
+    });
+
     it('should be able to save as a file', function() {
-      filename = j.save('/tmp');
+      filename = j.save('/tmp/puppetmaster');
     });
 
     it('should be able to load as a file', function() {
@@ -295,6 +304,21 @@ describe('Job', function() {
 });
 
 describe('Storage', function() {
+  var rimraf = require('rimraf'),
+      fs = require('fs');
+
+  beforeEach(function(done) {
+    fs.mkdir('/tmp/puppetmaster', function() {
+      done();
+    });
+  });
+
+  afterEach(function(done) {
+    rimraf('/tmp/puppetmaster', function() {
+      done();
+    });
+  });
+
   describe('create a storage instance (memory)', function() {
     var s = new Storage();
     it('should be created as a storage instance', function() {
@@ -309,7 +333,7 @@ describe('Storage', function() {
   });
 
   describe('create a storage instance (file)', function() {
-    var s = new Storage('/tmp');
+    var s = new Storage('/tmp/puppetmaster');
     it('should be created as a storage instance', function() {
       s.should.be.a.Storage;
       s.connection.type.should.be.equal('file');

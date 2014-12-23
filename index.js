@@ -110,7 +110,6 @@ PuppetMaster.prototype.createRequest = function createRequest(req, res) {
       request;
 
   if (!data.destination || !data.message || !this.vaildMessage(data.message)) {
-    console.log(data);
     return res.status(400).json({
       message: 'Invaild destnation or message'
     });
