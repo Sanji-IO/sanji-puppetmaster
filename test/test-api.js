@@ -113,7 +113,7 @@ describe('PuppetMaster', function() {
     it('[Get] /jobs/:id should be able to get a job by id', function(done) {
       request(app)
         .get('/jobs/' + Object.keys(pm._jobs)[0])
-        .send(reqJobData)
+        .send(reqRequestData)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(done);
@@ -154,6 +154,15 @@ describe('PuppetMaster', function() {
         });
     });
 
+    it('[Post] /jobs should return if parameter wrong', function(done) {
+      request(app)
+        .post('/jobs')
+        .send({})
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(done);
+    });
+
   });
 
   describe('Request API Endpoints', function() {
@@ -189,11 +198,12 @@ describe('PuppetMaster', function() {
     it('[Post] /requests should be able to create a request', function(done) {
       request(app)
         .post('/requests')
-        .send(reqJobData)
+        .send(reqRequestData)
         .expect(200)
         .expect('Content-Type', /json/)
         .end(function(err, res) {
           if (err) {
+            console.log(err);
             return done(err);
           }
 
@@ -207,6 +217,20 @@ describe('PuppetMaster', function() {
             done();
           });
         });
+    });
+
+    it('[Post] /requests should return error if parameter error', function(done) {
+      request(app)
+        .post('/requests')
+        .send({
+          destination: 'so wrong',
+          message: {
+            method: 'get'
+          }
+        })
+        .expect(400)
+        .expect('Content-Type', /json/)
+        .end(done);
     });
   });
 });

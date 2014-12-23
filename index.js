@@ -69,6 +69,12 @@ PuppetMaster.prototype.createJob = function createJob(req, res) {
       data = req.body,
       job;
 
+  if (!data.destinations || !data.message || !this.vaildMessage(data.message)) {
+    return res.status(400).json({
+      message: 'Invaild destnations or message'
+    });
+  }
+
   job = new Job(data);
   this._jobs[job.id] = job;
 
@@ -102,6 +108,13 @@ PuppetMaster.prototype.getOneJob = function getOneJob(req, res) {
 PuppetMaster.prototype.createRequest = function createRequest(req, res) {
   var data = req.body,
       request;
+
+  if (!data.destination || !data.message || !this.vaildMessage(data.message)) {
+    console.log(data);
+    return res.status(400).json({
+      message: 'Invaild destnation or message'
+    });
+  }
 
   request = new Request(data);
   this._requests[request.id] = request;
@@ -139,6 +152,15 @@ PuppetMaster.prototype.changeEventFn = function changeEventFn(resource) {
     });
     logger.trace('emit change event');
   };
+};
+
+PuppetMaster.prototype.vaildMessage = function(message) {
+  message = message || {};
+  if (message.method && message.resource) {
+    return true;
+  }
+
+  return false;
 };
 
 module.exports = PuppetMaster;
