@@ -6,6 +6,8 @@ sanji-puppetmaster
 ==================
 [![Build Status](https://travis-ci.org/Sanji-IO/sanji-puppetmaster.svg)](https://travis-ci.org/Sanji-IO/sanji-puppetmaster) [![Coverage Status](https://coveralls.io/repos/Sanji-IO/sanji-puppetmaster/badge.png?branch=develop)](https://coveralls.io/r/Sanji-IO/sanji-puppetmaster?branch=develop)
 
+[![NPM](https://nodei.co/npm/sanji-puppetmaster.png)](https://nodei.co/npm/sanji-puppetmaster/)
+
 Process batch command/data/event from server to clients.
 
 Endpoints
