@@ -144,12 +144,16 @@ PuppetMaster.prototype.getAllRequests = function getAllRequests(req, res) {
 
 PuppetMaster.prototype.changeEventFn = function changeEventFn(resource) {
   var self = this;
+
   return function(err, result) {
-    self.io.emit('sanji.puppetmaster', {
+    var emitData = {
       resource: resource,
       data: result
-    });
-    logger.trace('emit change event');
+    };
+
+    logger.debug('emit change event');
+    logger.trace(emitData);
+    self.io.emit('sanji.puppetmaster', emitData);
   };
 };
 

@@ -218,6 +218,47 @@ describe('PuppetMaster', function() {
         });
     });
 
+    it('[Post] /requests should push only "a" notify when timeout occurs', function(done) {
+      var reqData = _.clone(reqRequestData),
+          promise = bundle.publish.direct.get;
+
+      reqData.options = {timeout: 0.00001};
+      bundle.publish.direct.get = function() {
+        return new Promise(function() {});
+      };
+
+      request(app)
+        .post('/requests')
+        .send(reqData)
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          var cb = function(count) {
+            if (count === 1) {
+              setTimeout(function() {
+                ioclient.removeAllListeners('sanji.puppetmaster');
+                bundle.publish.direct.get = promise;
+                done();
+              }, 10);
+            } else if (count > 1){
+              bundle.publish.direct.get = promise;
+              ioclient.removeAllListeners('sanji.puppetmaster');
+              done('get more than one notify');
+            }
+          };
+
+          var count = 0;
+          ioclient.on('sanji.puppetmaster', function(result) {
+            ++count;
+            cb(count);
+          });
+        });
+    });
+
     it('[Post] /requests should return error if parameter error', function(done) {
       request(app)
         .post('/requests')

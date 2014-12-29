@@ -22,7 +22,7 @@ function makeMockPromise(resource, data, dest) {
       data: {
         resource: resource,
         data: data,
-        dest: dest
+        destination: dest
       }
     });
   });
@@ -129,11 +129,25 @@ describe('Request', function() {
 
   describe('to json', function() {
     var t = new Request({destination: destinations[0], message: request});
-    it('should return correct properties', function() {
-      var cb = function() {
-        var obj = t.toJSON();
-        t.__request.should.have.ownProperty('timeoutTimer');
-        obj.__request.should.not.have.ownProperty('timeoutTimer');
+    it('should return correct properties', function(done) {
+      var cb = function(err, result) {
+        try {
+          var obj = t.toJSON();
+          obj.should.have.ownProperty('id').and.be.a.Number;
+          obj.should.have.ownProperty('method').and.be.a.String;
+          obj.should.have.ownProperty('resource').and.be.a.String;
+          obj.should.have.ownProperty('data').and.be.a.Object;
+          obj.should.have.ownProperty('__request').and.be.a.Object;
+          obj.should.have.propertyByPath('__request', 'destination');
+          obj.should.have.propertyByPath('__request', 'createdAt');
+          obj.should.have.propertyByPath('__request', 'finishedAt');
+          obj.should.have.propertyByPath('__request', 'status').and.be.a.String;
+          obj.should.have.propertyByPath('__request', 'progress').and.be.a.Number;
+          obj.should.have.propertyByPath('__request', 'result').and.be.a.Object;
+          done();
+        } catch (e) {
+          done(e);
+        }
       };
       t.submit(bundle, cb);
     });
@@ -145,7 +159,6 @@ describe('Job', function() {
     j.should.have.ownProperty('id').and.be.a.Number;
     j.should.have.ownProperty('createdAt');
     j.should.have.ownProperty('finishedAt');
-    j.should.have.ownProperty('timeout').and.be.a.Number;
     j.should.have.ownProperty('status').and.be.a.String;
     j.should.have.ownProperty('progress').and.be.a.Number;
     j.should.have.ownProperty('totalCount').and.be.a.Number;
