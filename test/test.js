@@ -201,12 +201,17 @@ describe('Job', function() {
     it('should be able to submit all requests and update status/progress',
       function(done) {
         var cb = function(err, job) {
-          should(err).be.null;
-          job.requests[0].__request.status.should.be.equal('resloved');
-          job.doneCount.should.be.equal(1);
-          job.errorCount.should.be.equal(0);
-          job.progress.should.be.equal(100);
-          done();
+          try {
+            should(err).be.null;
+            job.status.should.be.equal('resolved');
+            job.requests[0].__request.status.should.be.equal('resloved');
+            job.doneCount.should.be.equal(1);
+            job.errorCount.should.be.equal(0);
+            job.progress.should.be.equal(100);
+            done();
+          } catch (e) {
+            done(e);
+          }
         };
         j.submitAll(bundle, cb);
     });
