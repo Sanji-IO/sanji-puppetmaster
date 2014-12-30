@@ -60,6 +60,8 @@ describe('Request', function() {
       t.should.have.propertyByPath('__request', 'status').and.be.a.String;
       t.should.have.propertyByPath('__request', 'progress').and.be.a.Number;
       t.should.have.propertyByPath('__request', 'result').and.be.null;
+
+      t.__request.status.should.be.equal('created');
     });
   });
 
@@ -82,10 +84,13 @@ describe('Request', function() {
 
         result.__request.result.data.data.should.be.eql(request.data);
         result.__request.status.should.be.equal('resloved');
+        result.__request.progress.should.be.equal(100);
         done(err);
       };
 
       ts.submit(bundle, cb);
+      //  this may cause:  Error: done() called multiple times
+      ts.__request.status.should.be.equal('dispatching');
     });
 
     it('should be done and then cancel timeout timer', function(done) {
@@ -213,7 +218,10 @@ describe('Job', function() {
             done(e);
           }
         };
+        j.status.should.be.equal('created');
         j.submitAll(bundle, cb);
+        //  this may cause:  Error: done() called multiple times
+        j.status.should.be.equal('dispatching');
     });
   });
 
@@ -227,14 +235,18 @@ describe('Job', function() {
     it('should be able to submit all requests and update status/progress',
       function(done) {
         var cb = function(err, job) {
-          should(err).be.null;
-          job.requests.forEach(function(request) {
-            request.__request.status.should.be.equal('resloved');
-          });
-          job.doneCount.should.be.equal(3);
-          job.errorCount.should.be.equal(0);
-          job.progress.should.be.equal(100);
-          done();
+          try {
+            should(err).be.null;
+            job.requests.forEach(function(request) {
+              request.__request.status.should.be.equal('resloved');
+            });
+            job.doneCount.should.be.equal(3);
+            job.errorCount.should.be.equal(0);
+            job.progress.should.be.equal(100);
+            done();
+          } catch (e) {
+            done(e);
+          }
         };
         j.submitAll(bundle, cb);
     });
