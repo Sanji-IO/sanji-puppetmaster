@@ -50,7 +50,7 @@ describe('PuppetMaster', function() {
     };
 
     ['get', 'post', 'put', 'delete'].forEach(function(method) {
-      bundle.publish.direct[method] = makeMockPromise;
+      bundle.publish[method] = makeMockPromise;
     });
 
     // setup socket.io
@@ -220,10 +220,10 @@ describe('PuppetMaster', function() {
 
     it('[Post] /requests should push only "a" notify when timeout occurs', function(done) {
       var reqData = _.clone(reqRequestData),
-          promise = bundle.publish.direct.get;
+          promise = bundle.publish.get;
 
       reqData.options = {timeout: 0.00001};
-      bundle.publish.direct.get = function() {
+      bundle.publish.get = function() {
         return new Promise(function() {});
       };
 
@@ -241,11 +241,11 @@ describe('PuppetMaster', function() {
             if (count === 1) {
               setTimeout(function() {
                 ioclient.removeAllListeners('sanji.puppetmaster');
-                bundle.publish.direct.get = promise;
+                bundle.publish.get = promise;
                 done();
               }, 10);
             } else if (count > 1){
-              bundle.publish.direct.get = promise;
+              bundle.publish.get = promise;
               ioclient.removeAllListeners('sanji.puppetmaster');
               done('get more than one notify');
             }

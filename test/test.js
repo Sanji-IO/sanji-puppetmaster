@@ -38,7 +38,7 @@ describe('Request', function() {
 
   beforeEach(function() {
     ['get', 'post', 'put', 'delete'].forEach(function(method) {
-      bundle.publish.direct[method] = makeMockPromise;
+      bundle.publish[method] = makeMockPromise;
     });
   });
 
@@ -76,14 +76,14 @@ describe('Request', function() {
       ts = new Request({destination: destinations[0], message: request});
     });
 
-    it('should be able to submit/resloved', function(done) {
+    it('should be able to submit/resolved', function(done) {
       var cb = function(err, result) {
         if (err) {
           return done(err);
         }
 
         result.__request.result.data.data.should.be.eql(request.data);
-        result.__request.status.should.be.equal('resloved');
+        result.__request.status.should.be.equal('resolved');
         result.__request.progress.should.be.equal(100);
         done(err);
       };
@@ -104,7 +104,7 @@ describe('Request', function() {
 
         clock.tick(36001);
         spy.called.should.be.false;
-        ts.__request.status.should.be.equal('resloved');
+        ts.__request.status.should.be.equal('resolved');
         done();
       };
 
@@ -113,7 +113,7 @@ describe('Request', function() {
 
     it('should be timeout if request exceeds limit time', function(done) {
       // mock _send
-      bundle.publish.direct.post = function(resource, data, dest) {
+      bundle.publish.post = function(resource, data, dest) {
         return Promise.delay(36001);
       };
 
@@ -180,7 +180,7 @@ describe('Job', function() {
 
   beforeEach(function() {
     ['get', 'post', 'put', 'delete'].forEach(function(method) {
-      bundle.publish.direct[method] = makeMockPromise;
+      bundle.publish[method] = makeMockPromise;
     });
   });
 
@@ -209,7 +209,7 @@ describe('Job', function() {
           try {
             should(err).be.null;
             job.status.should.be.equal('resolved');
-            job.requests[0].__request.status.should.be.equal('resloved');
+            job.requests[0].__request.status.should.be.equal('resolved');
             job.doneCount.should.be.equal(1);
             job.errorCount.should.be.equal(0);
             job.progress.should.be.equal(100);
@@ -238,7 +238,7 @@ describe('Job', function() {
           try {
             should(err).be.null;
             job.requests.forEach(function(request) {
-              request.__request.status.should.be.equal('resloved');
+              request.__request.status.should.be.equal('resolved');
             });
             job.doneCount.should.be.equal(3);
             job.errorCount.should.be.equal(0);
@@ -255,7 +255,7 @@ describe('Job', function() {
   describe('submit all requests in job with error', function() {
     it('should increase errorCount', function(done) {
 
-      bundle.publish.direct.post = function(resource, data, dest) {
+      bundle.publish.post = function(resource, data, dest) {
         return Promise.reject('error');
       };
 
