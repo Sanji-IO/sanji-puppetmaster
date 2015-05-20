@@ -28,6 +28,12 @@ function makeMockPromise(resource, data, dest) {
   });
 }
 
+function makeMockPromiseWithDelay(delay) {
+  return function(resource, data, dest) {
+    return makeMockPromise(resource, data, dest).delay(delay);
+  }
+}
+
 describe('Request', function() {
 
   var bundle = {
@@ -234,7 +240,9 @@ describe('Job', function() {
 
     it('should be able to submit all requests and update status/progress',
       function(done) {
-        var cb = function(err, job) {
+        bundle.publish.post = makeMockPromiseWithDelay(2);
+        var prevFinishedAt = new Date().getTime();
+        var doneCb = function(err, job) {
           try {
             should(err).be.null;
             job.requests.forEach(function(request) {
@@ -248,7 +256,14 @@ describe('Job', function() {
             done(e);
           }
         };
-        j.submitAll(bundle, cb);
+
+        var updateCb = function(err, request) {
+          var finishedAt = (new Date(request.__request.finishedAt)).getTime();
+          finishedAt.should.be.above(prevFinishedAt);
+          prevFinishedAt = finishedAt;
+        };
+
+        j.submitAll(bundle, doneCb, updateCb);
     });
   });
 

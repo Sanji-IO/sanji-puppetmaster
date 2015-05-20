@@ -1,8 +1,8 @@
 var _ = require('lodash'),
+    debug = require('debug')('sanji:puppetmaster:core'),
     express = require('express'),
     Job = require('./lib/job'),
     Request = require('./lib/request'),
-    logger = require('sanji-logger')('PuppetMaster'),
     PuppetMaster;
 
 PuppetMaster = function PuppetMaster(bundle, io) {
@@ -151,8 +151,8 @@ PuppetMaster.prototype.changeEventFn = function changeEventFn(resource) {
       data: result
     };
 
-    logger.debug('emit change event');
-    logger.trace(emitData);
+    debug('emit change event');
+    debug(emitData);
     self.io.emit('sanji.puppetmaster', emitData);
   };
 };
